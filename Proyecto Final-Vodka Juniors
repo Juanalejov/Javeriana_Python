@@ -1,0 +1,436 @@
+#!/usr/bin/env python3 
+#Este codigo simulara el juego de BATTLESHIP o BATALLA NAVAL creando un tablero,
+#aleatorizando la posicion de las piezas del oponente, restando los disparos luego que los usas y
+#dará el resultado del ganador dependiendo si se queda sin barcos o sin disparos
+
+from pickle import TRUE
+import random
+import os #sistema operativo
+
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "sí"
+
+#variables globales
+FILAS = 10
+COLUMNAS = 10
+MAR = "O"
+BARCOG = "B"  
+DISPARO_FALLADO = "X"
+DISPARO_ACERTADO = "D"
+DISPAROS_INICIALES = 50
+cantidad_barcos = 10
+JUGADOR_1="JUGADOR"
+JUGADOR_2 = "La computadora"
+cambiar_nombre=input("Desea escribir su nombre? Escriba SI o NO:")
+if cambiar_nombre=="SI":
+    JUGADOR_1=input("Escriba su nombre: ")
+elif cambiar_nombre=="NO":
+    JUGADOR_1=JUGADOR_1
+
+
+def obtener_matriz_inicial():
+    """this funtion will start to get the range to create 
+    the matrix with lines and columns
+
+    Returns:
+        int: This will be the range of the columns and lines of the matrix
+    """
+    matriz = []
+    for y in range(FILAS):
+        matriz.append([])
+        for x in range(COLUMNAS):
+            matriz[y].append(MAR)
+    return matriz
+
+
+def incrementar_letra(letra):
+    """This function will create the letters part of the matrix
+
+    Args:
+        letra (str): Leters to be part of the coordenates of
+        the matrix
+
+    Returns:
+        str: leters to be the lines of the matrix
+    """
+    return chr(ord(letra)+1)
+
+def imprimir_separador_horizontal():
+    """This funtion will create the separation in the map with the sign +
+    and the sign -
+    """
+    for _ in range(COLUMNAS+1):
+        print("+---", end="")
+    print("+")
+
+def imprimir_fila_de_numeros():
+    """This funtion will print and separate the column with numbers 
+    in the range dicted before
+    """
+    print("|   ", end="")
+    for x in range(COLUMNAS):
+        print(f"| {x+1} ", end="")
+    print("|")
+
+def es_mar(x, y, matriz):
+    """This funtions will the part of the board that will be Sea
+
+    Args:
+        x (int): coord x 
+        y (int): coord y
+        matriz (str): the matrix
+
+    Returns:
+        str: the sea
+    """
+    return matriz[y][x] == MAR
+
+def coordenada_en_rango(x, y):
+    """This function will determinate if the coordinate recieved is 
+    in range or not
+
+    Args:
+        x (int): coordinate x
+        y (int): coordinate y
+
+    Returns:
+        str: the result of is in range or not
+    """
+    return x >= 0 and x <= COLUMNAS-1 and y >= 0 and y <= FILAS-1
+
+def colocar_e_imprimir_barcosrm(matriz, cantidad_barcos, jugador):
+    """This function will put in the board and print the boats
+    dependind if is the player or the conputer turn
+
+    Args:
+        matriz (str): the matrix
+        cantidad_barcos (int): number of boats
+        jugador (str): the player that have the turn
+
+    Returns:
+        int: the matrix but with the boats in it
+    """
+    barcos = cantidad_barcos
+    if jugador == JUGADOR_1:
+        print(F"Imprimiendo barcos del jugador:  {JUGADOR_1}")
+    else:
+        print("Imprimiendo barcos de Computador")
+    matriz = colocar_barcos_de_una_celdarm(barcos, BARCOG, matriz)
+    return matriz
+
+def colocar_e_imprimir_barcos(matriz, cantidad_barcos, jugador):
+    """This function will print wich player is printing the
+    boats on each turn
+
+    Args:
+        matriz (str): the matrix
+        cantidad_barcos (int): number of boats
+        jugador (str): the player that have the turn
+
+    Returns:
+        str: printing the boats of each player
+    """
+    barcos = cantidad_barcos
+    if jugador == JUGADOR_1:
+        print(F"Imprimiendo barcos del jugador:  {JUGADOR_1}")
+    else:
+        print("Imprimiendo barcos de Computador")
+    print(f"Cantidad total de Barcos {barcos}")
+    matriz = colocar_barcos_de_una_celda(barcos, BARCOG, matriz)
+    return matriz
+
+def x_aleatoria():
+    """This function will randomise the position on the 
+    X axis
+
+    Returns:
+        int: the position on the x axis
+    """
+    return random.randint(0, COLUMNAS-1)
+
+def y_aleatoria():
+    """This function will randomise the position on the 
+    Y axis
+
+    Returns:
+        int: the position on the Y axis
+    """
+    return random.randint(0, FILAS-1)
+
+def colocar_barcos_de_una_celdarm(cantidad, tipo_barco, matriz):
+    """This function will place the boats on the board
+    and stop when there is no boats left to put
+
+    Args:
+        cantidad (int): number of boats
+        tipo_barco (str): type of boat
+        matriz (str): the matrix
+
+    Returns:
+        str: the matrix but with the boats placed randomly
+    """
+    barcos_colocados = 0
+    while True:#colocar barcos de manera aleatoria
+        x = x_aleatoria()
+        y = y_aleatoria()
+        if es_mar(x, y, matriz):
+            matriz[y][x] = tipo_barco
+            barcos_colocados += 1
+        if barcos_colocados >= cantidad:
+            break
+    return matriz
+
+def colocar_barcos_de_una_celda(cantidad, tipo_barco, matriz):
+    """This function will place the boats on the board
+    and stop when there is no boats left to put
+
+    Args:
+        cantidad (int): number of boats
+        tipo_barco (str): type of boat
+        matriz (str): the matrix
+
+    Returns:
+        str: the matrix but with the boats placed randomly
+    """
+    barcos_colocados = 0
+    while True:
+        x = int(input(f"Ingrese el número de la columna del barco ({barcos_colocados+1}):"))-1
+        y = int(input(f"Ingrese el número de fila del barco ({barcos_colocados+1}): "))-1
+        if es_mar(x, y, matriz):
+            matriz[y][x] = tipo_barco
+            barcos_colocados += 1
+        if barcos_colocados >= cantidad:
+            break
+    return matriz
+
+def imprimir_disparos_restantes(disparos_restantes, jugador):
+    """This function will print how many shoots the player have
+    left and the name
+
+    Args:
+        disparos_restantes (int): number of shoots left
+        jugador (str): name of the player
+    """
+    print(f"Disparos restantes de {jugador}: {disparos_restantes}")
+
+def imprimir_matriz(matriz, deberia_mostrar_barcos, jugador):
+    """This function will print the matrix of the player and the
+    computer, the first one showing the boats and the second one not
+    showing them to play
+
+    Args:
+        matriz (str): the matrix
+        deberia_mostrar_barcos (str): the varible to show or not show the boats
+        jugador (str): the player
+    """
+    print(f"Este es el mar del jugador {jugador}: ")
+    letra = "A"
+    for y in range(FILAS):
+        imprimir_separador_horizontal()
+        print(f"| {letra} ", end="")
+        for x in range(COLUMNAS):
+            celda = matriz[y][x]
+            valor_real = celda
+            if not deberia_mostrar_barcos and valor_real != MAR and valor_real != DISPARO_FALLADO and valor_real != DISPARO_ACERTADO:
+                valor_real = "O"
+            print(f"| {valor_real} ", end="")
+        letra = incrementar_letra(letra)
+        print("|",) 
+    imprimir_separador_horizontal()
+    imprimir_fila_de_numeros()
+    imprimir_separador_horizontal()
+
+
+def solicitar_coordenadas(jugador):
+    """This function will ask the player for the coordinates for
+    the boats he have
+
+    Args:
+        jugador (str): the player
+
+    Returns:
+        int: The postion on the X and Y axis
+    """
+    if jugador == JUGADOR_1:
+        print(f"Solicitando coordenadas de disparo al jugador {jugador}")
+        y = None
+        x = None
+        while True:
+            letra_fila = input(
+                "Ingresa la letra de la fila tal y como aparece en el tablero: ")
+            if len(letra_fila) != 1:
+                print("Debes ingresar únicamente una letra")
+                continue
+            y = ord(letra_fila) - 65
+            if coordenada_en_rango(0, y):
+                break
+            else:
+                print("Fila inválida")
+        while True:
+            try:
+                x = int(input("Ingresa el número de columna: "))
+                if coordenada_en_rango(x-1, 0):
+                    x = x-1  
+                    break
+                else:
+                    print("Columna inválida")
+            except:
+                print("Ingresa un número válido")         
+    else:
+        x = x_aleatoria()
+        y = y_aleatoria()
+        return x, y 
+    return x, y 
+      
+def disparar(x, y, matriz) -> bool:
+    """This function will make me 
+
+    Args:
+        x (int): coordinate of x axis
+        y (int): coordinate of y axis
+        matriz (str): the matrix
+
+    Returns:
+        bool: will return if the the player failed the shoot or hit the 
+        objetive and update the matrix 
+    """
+    if es_mar(x, y, matriz):
+        matriz[y][x] = DISPARO_FALLADO
+        return False
+    elif matriz[y][x] == DISPARO_FALLADO or matriz[y][x] == DISPARO_ACERTADO:
+        return False
+    else:
+        matriz[y][x] = DISPARO_ACERTADO
+        return True
+
+def oponente_de_jugador(jugador):
+    """This function will put in the system who is your
+    oponent and the computers oponent
+
+    Args:
+        jugador (str): the player
+
+    Returns:
+        str: the players or computers oponent
+    """
+    if jugador == JUGADOR_1:
+        return JUGADOR_2
+    else:
+        return JUGADOR_1
+
+def todos_los_barcos_hundidos(matriz):
+    """This function will show if its true or false
+    that a boat has been hit
+
+    Args:
+        matriz (str): the matrix
+
+    Returns:
+        str: TRUE
+    """
+    for y in range(FILAS):
+        for x in range(COLUMNAS):
+            celda = matriz[y][x]
+            if celda != MAR and celda != DISPARO_ACERTADO and celda != DISPARO_FALLADO:
+                return False
+    return True
+
+def indicar_victoria(jugador):
+    """This funtion will show who is the winner of the game
+
+    Args:
+        jugador (str): The player
+    """
+    print(f"Fin del juego\nEl jugador {jugador} es el ganador\nElija una opcion en el menu principal")
+
+def indicar_fracaso(jugador):
+    """This funtion will show who is the loser of the game
+
+    Args:
+        jugador (str): The player
+    """
+    print(
+        f"Fin del juego\nEl jugador {jugador} pierde. Se han acabado sus disparos\nElija una opcion en el menu principal")
+
+def imprimir_matrices_con_barcos(matriz_j1, matriz_j2):
+    """This function will print the matrixes with the boats
+    at the end of the game
+
+    Args:
+        matriz_j1 (str): matrix of the player 1
+        matriz_j2 (str): matrix of the player 2
+    """
+    print("Mostrando ubicación de los barcos de ambos jugadores:")
+    imprimir_matriz(matriz_j1, True, JUGADOR_1)
+    imprimir_matriz(matriz_j2, True, JUGADOR_2)
+
+def jugar():
+    """This function will be the combination of all of the functions 
+    made before to make the game work
+    """
+    disparos_restantes_j1 = DISPAROS_INICIALES
+    disparos_restantes_j2 = DISPAROS_INICIALES
+    matriz_j1, matriz_j2 = obtener_matriz_inicial(), obtener_matriz_inicial()
+    matriz_j1 = colocar_e_imprimir_barcos(matriz_j1, cantidad_barcos, JUGADOR_1)
+    matriz_j2 = colocar_e_imprimir_barcosrm(matriz_j2, cantidad_barcos, JUGADOR_2)
+    turno_actual = JUGADOR_1
+    print("=========================")
+    while True:
+        print(f"Turno de {turno_actual}")
+        disparos_restantes = disparos_restantes_j2
+        if turno_actual == JUGADOR_1:
+            disparos_restantes = disparos_restantes_j1
+        imprimir_disparos_restantes(disparos_restantes, turno_actual)
+        matriz_oponente = matriz_j1
+        if turno_actual == JUGADOR_1:
+            matriz_oponente = matriz_j2
+        imprimir_matriz(matriz_oponente, False, oponente_de_jugador(turno_actual))
+        imprimir_matriz(matriz_j1, True, oponente_de_jugador(JUGADOR_2))
+        x, y = solicitar_coordenadas(turno_actual)
+        acertado = disparar(x, y, matriz_oponente)
+        if turno_actual == JUGADOR_1:
+            disparos_restantes_j1 -= 1
+        else:
+            disparos_restantes_j2 -= 1
+        imprimir_matriz(matriz_j1, False, oponente_de_jugador(JUGADOR_1))
+        imprimir_matriz(matriz_oponente, False, oponente_de_jugador(turno_actual))
+       
+        if acertado:
+            print("El disparo dio en el Objetivo")
+            if todos_los_barcos_hundidos(matriz_oponente):
+                indicar_victoria(turno_actual)
+                imprimir_matrices_con_barcos(matriz_j1, matriz_j2)
+                break
+        else:
+            print("El disparo fallo!!!")
+            if disparos_restantes-1 <= 0:
+                indicar_fracaso(turno_actual)
+                imprimir_matrices_con_barcos(matriz_j1, matriz_j2)
+                break
+            turno_actual = oponente_de_jugador(turno_actual)
+
+def mainMenu():
+    """This function is the main menu of the game
+    """
+    print(f"Elige una opcion jugador {JUGADOR_1} ")
+    eleccion = ""
+    while eleccion != "3":
+        menu = """  
+-----Vodka Juniors-----
+
+-----Batalla Naval-----
+
+-----Menu Principal----
+
+1. Introducir Nombre de Jugador
+2. Iniciar Juego
+3. Cerrar Programa
+"""
+        eleccion = input(menu)
+        if eleccion == "2":
+            jugar()
+        if eleccion == "1":
+            if JUGADOR_1=="JUGADOR":
+                print("Nombre predeterminado: JUGADOR")
+            else:
+                print("Su nombre a sido introducido correctamente")        
+mainMenu()
